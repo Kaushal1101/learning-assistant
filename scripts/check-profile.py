@@ -7,19 +7,7 @@ VALID_EXPERIENCE_LEVELS = {"junior", "mid", "senior"}
 ROOT = Path(__file__).parent.parent
 
 
-def main():
-    path = ROOT / "user.json"
-
-    if not path.exists():
-        print("user.json not found. Run /setup-profile first.")
-        sys.exit(1)
-
-    try:
-        data = json.loads(path.read_text())
-    except json.JSONDecodeError as e:
-        print(f"user.json is invalid JSON: {e}")
-        sys.exit(1)
-
+def validate(data: dict) -> list[str]:
     errors = []
 
     if "experience_level" not in data:
@@ -41,6 +29,24 @@ def main():
 
     if "updated_at" not in data:
         errors.append("missing: updated_at")
+
+    return errors
+
+
+def main(root: Path = ROOT):
+    path = root / "user.json"
+
+    if not path.exists():
+        print("user.json not found. Run /setup-profile first.")
+        sys.exit(1)
+
+    try:
+        data = json.loads(path.read_text())
+    except json.JSONDecodeError as e:
+        print(f"user.json is invalid JSON: {e}")
+        sys.exit(1)
+
+    errors = validate(data)
 
     if errors:
         print("user.json is invalid:")
