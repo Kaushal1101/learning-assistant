@@ -25,7 +25,7 @@ Written by `/whiteboard-ready` after profile intake. Stored at repo root.
 
 Stored at `lessons/<name>/lesson.json`. Built up in stages.
 
-### Stage 1 — written by `/whiteboard-ready` after lesson intake
+### Stage 1a — written by `/whiteboard-ready` after phase 1 (lesson-intro)
 
 ```json
 {
@@ -33,8 +33,27 @@ Stored at `lessons/<name>/lesson.json`. Built up in stages.
   "scope": "routing and dependency injection",
   "goal": "build a small REST API from scratch",
   "tool_experience": "none",           // "none" | "heard-of" | "used-a-little" | "comfortable"
+  "intake_phase": "diagnostic"         // tracks which intake phase comes next
+}
+```
+
+### Stage 1b — updated by `/whiteboard-ready` after phase 2 (lesson-diagnostic)
+
+```json
+{
+  "intake_phase": "constraints",
+  "diagnostic_notes": "User knows Python well but hasn't used type hints or decorators extensively. No prior FastAPI or Starlette experience."
+}
+```
+
+### Stage 1c — updated by `/whiteboard-ready` after phase 3 (lesson-constraints)
+
+```json
+{
+  "intake_phase": "complete",
   "time_budget_hours": 2,
-  "language": "python"                 // only set when explicitly provided or ambiguous
+  "language": "python",                // only set when explicitly provided or ambiguous
+  "constraints": ["no async", "keep examples simple"]
 }
 ```
 
@@ -114,8 +133,11 @@ Stored at `lessons/<name>/lesson.json`. Built up in stages.
   "scope": "routing and dependency injection",
   "goal": "build a small REST API from scratch",
   "tool_experience": "none",
+  "diagnostic_notes": "User knows Python well but hasn't used type hints or decorators extensively. No prior FastAPI or Starlette experience.",
   "time_budget_hours": 2,
   "language": "python",
+  "constraints": ["no async", "keep examples simple"],
+  "intake_phase": "complete",
   "tier": 1,
   "stack": "fastapi-python",
   "status": "complete",

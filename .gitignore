@@ -1,6 +1,10 @@
 WHITEBOARD.md
 user.json
 
+# User lessons (not committed upstream; users commit these in their own forks)
+lessons/
+!lessons/example-*/
+
 # Python
 __pycache__/
 *.pyc

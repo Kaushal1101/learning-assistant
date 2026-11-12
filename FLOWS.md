@@ -26,10 +26,12 @@ Every form the agent writes to `WHITEBOARD.md` begins with a machine-readable co
 
 ```
 <!-- type: profile -->
-<!-- type: lesson-intake round: 1/3 -->
-<!-- type: lesson-intake round: 2/3 -->
-<!-- type: lesson-intake round: 3/3 -->
+<!-- type: lesson-intro round: 1/3 -->
+<!-- type: lesson-diagnostic round: 1/3 -->
+<!-- type: lesson-constraints round: 1/3 -->
 ```
+
+Each form after phase 1 includes a "Context from previous phases (do not edit)" section written by the agent. This carries forward all accumulated data so `/whiteboard-ready` has full context from the file alone — no external state is needed during intake.
 
 ---
 
@@ -56,17 +58,47 @@ if type == profile:
   → delete WHITEBOARD.md
   → exit 0: "Profile saved. Run /new-lesson to start a lesson."  (or "Profile updated." if user.json existed)
 
-if type == lesson-intake:
-  → check round number from header
-    if round == 3: must proceed regardless of remaining gaps
-  → if more info needed AND round < 3:
-      a gap qualifies only if it blocks scaffolding:
-        - scope too broad to pick a stack
-        - language ambiguous and not inferable from user.json
-      "would be nice to know" does not qualify
-      overwrite WHITEBOARD.md (type: lesson-intake round: N+1/3)
+if type == lesson-intro:
+  → parse: topic, scope, goal, tool_experience
+  → validate all four fields present; scope must not just repeat the tool name
+    if invalid and round < 3: list problems, leave WHITEBOARD.md intact, stop
+    if invalid and round == 3: use best available values and proceed
+  → write WHITEBOARD.md (type: lesson-diagnostic round: 1/3):
+      section 1: "Context from phase 1 (do not edit)" — parsed intro values
+      section 2: 2–3 diagnostic questions targeting prerequisite concepts
+        chosen from user.json languages/frameworks that the lesson will actually require
+        focus on depth, not breadth — e.g. decorators, type hints for a FastAPI lesson
+        do NOT ask about the target tool if tool_experience is "none"
+  → exit 0: "Fill in WHITEBOARD.md and run /whiteboard-ready when done."
+
+if type == lesson-diagnostic:
+  → read "Context from phase 1" section
+  → read user's answers to diagnostic questions
+  → assess whether answers are specific enough to calibrate lesson difficulty
+    if vague and round < 3:
+      overwrite WHITEBOARD.md (type: lesson-diagnostic round: N+1/3)
+        preserve "Context from phase 1" section
+        write 1–2 sharper follow-up questions
       exit 0: "Updated whiteboard. Fill it in and run /whiteboard-ready again."
-  → if satisfied OR round == 3:
+  → if satisfied or round == 3:
+      write diagnostic_notes: one-paragraph summary of user's actual knowledge level
+      write WHITEBOARD.md (type: lesson-constraints round: 1/3):
+        section 1: "Context (do not edit)" — phase 1 values + diagnostic_notes
+        section 2: user-fillable fields: time_budget_hours, language (if ambiguous), hard constraints
+        section 3: "Agent's plan" — one paragraph the user can correct:
+          what will be built, what level it will be pitched at, which concepts it will focus on
+  → exit 0: "Review the agent's plan and fill in constraints. Run /whiteboard-ready when done."
+
+if type == lesson-constraints:
+  → read "Context" section (phases 1 + 2 data)
+  → parse: time_budget_hours, language, constraints
+  → check if user has corrected the agent's plan significantly
+    if significant corrections and round < 3:
+      overwrite WHITEBOARD.md (type: lesson-constraints round: N+1/3)
+        update "Agent's plan" to reflect corrections, ask user to confirm
+      exit 0: "Updated plan. Confirm it and run /whiteboard-ready again."
+  → if confirmed or round == 3:
+      write lessons/<name>/lesson.json  (name = <date>-<topic-slug>, all intake fields, status: in-progress)
       run check-prereqs   (exit 1 → stop, print what to install)
       run scaffold        (exit 1 → stop)
       run install         (exit 1 → stop)
@@ -90,8 +122,10 @@ exits:     "Edit any fields in WHITEBOARD.md and run /whiteboard-ready when done
 requires:  user.json
            runs check-profile
            exit 1 if fails: "Run /setup-profile first."
+           WHITEBOARD.md must not already exist
+           exit 1 if present: "A whiteboard is already open. Run /whiteboard-ready to continue."
 
-writes:    WHITEBOARD.md  (type: lesson-intake round: 1)
+writes:    WHITEBOARD.md  (type: lesson-intro round: 1/3)  from templates/whiteboard/lesson-intro.md
 exits:     "Fill in WHITEBOARD.md and run /whiteboard-ready when done."
 ```
 
@@ -111,6 +145,20 @@ exits:     "Grading complete. See REPORT.md."
 ## Scripts
 
 All scripts print a human-readable reason on exit 1.
+
+### `check-whiteboard`
+```
+reads:    WHITEBOARD.md  line 1 (type header) + section contents
+exit 0:   fields valid, round < 3 — follow-up permitted
+exit 1:   round == 3 — hard cap hit, must proceed regardless
+exit 2:   missing/unfilled fields (listed), or invalid header — leave whiteboard intact
+
+field checks by type:
+  lesson-intro:       topic, scope, goal, tool_experience all non-empty
+  lesson-diagnostic:  every non-context section has at least one answer line
+  lesson-constraints: Time budget section contains a number
+  profile:            exits 0 (validation delegated to check-profile)
+```
 
 ### `check-profile`
 ```
@@ -196,15 +244,32 @@ exit 1:   lists each missing or invalid item
               └─ "Run /new-lesson to start a lesson."
 
 /new-lesson
-  └─ check-profile          (exit 1 → "Run /setup-profile first." stop)
-  └─ writes WHITEBOARD.md   (type: lesson-intake round: 1)
+  └─ check-profile                      (exit 1 → "Run /setup-profile first." stop)
+  └─ writes WHITEBOARD.md               (type: lesson-intro round: 1/3)
+
+  Phase 1 — Basic intro (max 3 rounds)
      └─ user fills form
         └─ /whiteboard-ready
-              └─ [0–2 follow-up rounds max: only if a blocking gap exists; hard cap at round 3/3]
-              └─ check-prereqs   (exit 1 → list what to install, stop)
-              └─ scaffold        (exit 1 → stop)
-              └─ install         (exit 1 → stop)
-              └─ validate-lesson (exit 1 → stop)
+              └─ [follow-up if fields missing; hard cap round 3/3]
+              └─ writes WHITEBOARD.md   (type: lesson-diagnostic round: 1/3)
+                                         with phase 1 context + 2–3 diagnostic questions
+
+  Phase 2 — Tool diagnostic (max 3 rounds)
+     └─ user fills form
+        └─ /whiteboard-ready
+              └─ [follow-up if answers vague; hard cap round 3/3]
+              └─ writes WHITEBOARD.md   (type: lesson-constraints round: 1/3)
+                                         with context + constraints fields + agent's plan
+
+  Phase 3 — Constraints and review (max 3 rounds)
+     └─ user fills form + confirms or corrects agent's plan
+        └─ /whiteboard-ready
+              └─ [follow-up if plan corrected significantly; hard cap round 3/3]
+              └─ writes lessons/<name>/lesson.json
+              └─ check-prereqs          (exit 1 → list what to install, stop)
+              └─ scaffold               (exit 1 → stop)
+              └─ install                (exit 1 → stop)
+              └─ validate-lesson        (exit 1 → stop)
               └─ delete WHITEBOARD.md
               └─ "Lesson ready."
 
@@ -222,6 +287,6 @@ user works on lesson...
 ```
 /new-lesson
   └─ check-profile  (exit 0 → continue)
-  └─ writes WHITEBOARD.md  (type: lesson-intake round: 1)
-  └─ ... same as above from lesson intake onward
+  └─ writes WHITEBOARD.md  (type: lesson-intro round: 1/3)
+  └─ ... same three-phase intake as above
 ```
