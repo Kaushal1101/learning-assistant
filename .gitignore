@@ -1,0 +1,15 @@
+WHITEBOARD.md
+user.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Build output
+dist/
+build/

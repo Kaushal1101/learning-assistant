@@ -28,10 +28,15 @@ Upstream ships tooling and one sample lesson; each user's fork holds their own l
 
 ```
 .claude/
-  skills/            # new-lesson, grade, whiteboard-ready (tutors later)
+  skills/            # each command is a subdirectory with a SKILL.md file
+    setup-profile/
+    update-profile/
+    whiteboard-ready/
+    new-lesson/      # coming later
+    grade/           # coming later
   settings.json      # shared permissions
 CLAUDE.md            # repo map, global rules, scope tiers
-FLOWS.md             # skill prerequisites, script contracts, full end-to-end flows
+FLOWS.md             # command prerequisites, script contracts, full end-to-end flows
 SCHEMAS.md           # annotated JSON schemas for user.json and lesson.json
 WHITEBOARD.md        # transient intake form; gitignored, overwritten each round
 scripts/             # core Python scripts (cross-platform)
@@ -74,11 +79,11 @@ lessons/2026-11-fastapi-basics/
 
 Each round replaces the previous form entirely. The agent stores extracted context in memory or `lesson.json`, not in the whiteboard itself.
 
-## Skills and scripts
+## Commands and scripts
 
-Skills handle judgment; shipped scripts handle everything deterministic, so no tokens are spent regenerating infrastructure.
+Commands are user-facing slash commands invoked in Claude Code. Scripts handle everything deterministic so no tokens are spent on infrastructure.
 
-| Skill | Does | Default model (to confirm via evals) |
+| Command | Does | Default model (to confirm via evals) |
 | --- | --- | --- |
 | setup-profile | Write profile whiteboard form | Haiku |
 | update-profile | Re-write profile whiteboard pre-filled with existing values | Haiku |
@@ -119,20 +124,20 @@ Spend tokens only on what is new, show users what each lesson cost, and pick mod
 
 - Scripts for anything deterministic; the model only writes tasks and topic-specific code.
 - Adapt templates instead of writing from scratch.
-- Short skill files; load reference material on demand.
+- Short command files; load reference material on demand.
 - Agents read `lesson.json` state instead of rereading code.
 
-**Transparency:** each skill appends its token and cost usage to `lesson.json`. Users can also check `/cost`, `/context` and the status line in Claude Code.
+**Transparency:** each command appends its token and cost usage to `lesson.json`. Users can also check `/cost`, `/context` and the status line in Claude Code.
 
-**Model choice:** skills set a default model in frontmatter, which users can override. Defaults come from the eval harness.
+**Model choice:** commands set a default model in frontmatter, which users can override. Defaults come from the eval harness.
 
-**Eval harness (maintainer-only):** `evals/cases.json` holds 10–15 representative requests. `run_evals.py` runs each skill headless per model (`claude -p ... --model <m> --output-format json`), scores the result with `validate-lesson` and a reference solution, and logs pass rate, cost and time. Pick the cheapest model that clears the quality bar; re-run when skills change or new models ship.
+**Eval harness (maintainer-only):** `evals/cases.json` holds 10–15 representative requests. `run_evals.py` runs each command headless per model (`claude -p ... --model <m> --output-format json`), scores the result with `validate-lesson` and a reference solution, and logs pass rate, cost and time. Pick the cheapest model that clears the quality bar; re-run when commands change or new models ship.
 
 ## v1 scope and open decisions
 
-v1 ships five core skills (`setup-profile`, `update-profile`, `whiteboard-ready`, `new-lesson`, `grade`), core scripts, 2–3 Tier 1 stack templates, one sample lesson and the eval harness.
+v1 ships five core commands (`setup-profile`, `update-profile`, `whiteboard-ready`, `new-lesson`, `grade`), core scripts, 2–3 Tier 1 stack templates, one sample lesson and the eval harness.
 
-**Out of scope for v1:** tutor skills, Tier 2/3 topics, dev containers, extending a lesson with new tasks, non-Claude agents.
+**Out of scope for v1:** tutor commands, Tier 2/3 topics, dev containers, extending a lesson with new tasks, non-Claude agents.
 
 **Open decisions**
 

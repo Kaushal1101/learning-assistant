@@ -1,12 +1,12 @@
 # Deterministic Flows and Dependencies
 
-Every skill has explicit gate conditions. If a gate fails, the skill prints a clear error and exits — it never tries to recover inline. Scripts are the gatekeepers; skills are callers.
+Every command has explicit gate conditions. If a gate fails, the command prints a clear error and exits — it never tries to recover inline. Scripts are the gatekeepers; commands are callers.
 
 ---
 
 ## System state
 
-Two files determine what phase the system is in. Skills read these before acting; nothing is inferred from conversation context.
+Two files determine what phase the system is in. Commands read these before acting; nothing is inferred from conversation context.
 
 | File | Meaning |
 |------|---------|
@@ -33,7 +33,7 @@ Every form the agent writes to `WHITEBOARD.md` begins with a machine-readable co
 
 ---
 
-## Skills
+## Commands
 
 ### `/setup-profile`
 ```

@@ -78,13 +78,13 @@ Stored at `lessons/<name>/lesson.json`. Built up in stages.
 }
 ```
 
-### Stage 4 — appended by each skill run (usage tracking)
+### Stage 4 — appended by each command run (usage tracking)
 
 ```json
 {
   "usage": [
     {
-      "skill": "new-lesson",
+      "command": "new-lesson",
       "model": "claude-sonnet-4-6",
       "input_tokens": 1200,
       "output_tokens": 800,
@@ -92,7 +92,7 @@ Stored at `lessons/<name>/lesson.json`. Built up in stages.
       "timestamp": "2026-11-12T10:00:00Z"
     },
     {
-      "skill": "grade",
+      "command": "grade",
       "model": "claude-sonnet-4-6",
       "input_tokens": 2100,
       "output_tokens": 950,
@@ -132,8 +132,8 @@ Stored at `lessons/<name>/lesson.json`. Built up in stages.
     "total": 76
   },
   "usage": [
-    { "skill": "new-lesson", "model": "claude-sonnet-4-6", "input_tokens": 1200, "output_tokens": 800,  "cost_usd": 0.012, "timestamp": "2026-11-12T10:00:00Z" },
-    { "skill": "grade",      "model": "claude-sonnet-4-6", "input_tokens": 2100, "output_tokens": 950,  "cost_usd": 0.019, "timestamp": "2026-11-12T11:30:00Z" }
+    { "command": "new-lesson", "model": "claude-sonnet-4-6", "input_tokens": 1200, "output_tokens": 800,  "cost_usd": 0.012, "timestamp": "2026-11-12T10:00:00Z" },
+    { "command": "grade",      "model": "claude-sonnet-4-6", "input_tokens": 2100, "output_tokens": 950,  "cost_usd": 0.019, "timestamp": "2026-11-12T11:30:00Z" }
   ]
 }
 ```
