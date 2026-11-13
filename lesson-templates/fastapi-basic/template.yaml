@@ -1,0 +1,25 @@
+id: fastapi-basic
+language: python
+runtime_version: "3.11"
+framework: fastapi
+difficulty: beginner
+
+commands:
+  install: pip install -e ".[dev]"
+  test: pytest
+  run: uvicorn src.app.main:app --reload
+
+capabilities:
+  - http-api
+  - rest
+  - request-validation
+  - json
+
+topics:
+  - routing
+  - path-params
+  - query-params
+  - request-bodies
+  - pydantic-models
+  - status-codes
+  - testclient

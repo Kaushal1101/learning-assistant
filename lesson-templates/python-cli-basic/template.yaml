@@ -1,0 +1,24 @@
+id: python-cli-basic
+language: python
+runtime_version: "3.11"
+framework: argparse
+difficulty: beginner
+
+commands:
+  install: pip install -e ".[dev]"
+  test: pytest
+  run: python -m src.app.main
+
+capabilities:
+  - cli
+  - scripting
+  - file-io
+  - text-processing
+
+topics:
+  - argument-parsing
+  - subcommands
+  - exit-codes
+  - file-reading
+  - standard-io
+  - error-handling

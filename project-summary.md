@@ -41,7 +41,7 @@ SCHEMAS.md           # annotated JSON schemas for user.json and lesson.json
 WHITEBOARD.md        # transient intake form; gitignored, overwritten each round
 scripts/             # core Python scripts (cross-platform)
 templates/
-  stacks/            # base scaffolds, each with stack.json (install/test/run commands)
+  stacks/            # base scaffolds, each with template.yaml (install/test/run commands)
   tasks/             # task patterns: fix-bug, add-feature, write-tests
   files/             # lesson README, TASKS.md, lesson.json schema
   rubric.md          # grading criteria
@@ -91,7 +91,7 @@ Commands are user-facing slash commands invoked in Claude Code. Scripts handle e
 | new-lesson | Kick off lesson intake: write first whiteboard form, then scaffold and generate tasks once intake is complete | Sonnet (Opus when no template fits) |
 | grade | Run grading tests, review diff vs rubric, write REPORT.md | Sonnet |
 
-Core scripts: `check-prereqs`, `scaffold`, `install`, `check`, `grade-tests`, `validate-lesson`. They read each stack's `stack.json`, so adding a stack means adding a folder.
+Core scripts: `check-prereqs`, `scaffold`, `install`, `check`, `grade-tests`, `validate-lesson`. They read each stack's `template.yaml`, so adding a stack means adding a folder.
 
 When no stack fits, `new-lesson` builds one, validates it, and saves it to `templates/stacks/` for reuse. Good ones get PR'd upstream.
 

@@ -169,14 +169,14 @@ exit 1:   missing file, or lists which required fields are absent/invalid
 
 ### `check-prereqs`
 ```
-reads:    stack.json  (required runtime + minimum version)
+reads:    template.yaml  (required runtime + minimum version)
 exit 0:   all runtimes present and meet minimum version
 exit 1:   lists each missing or outdated runtime with the required version
 ```
 
 ### `scaffold`
 ```
-reads:    templates/stacks/<stack>/stack.json
+reads:    templates/stacks/<stack>/template.yaml
           user.json
           lesson intake data (passed as args or from temp file)
 writes:   lessons/<name>/src/
@@ -192,7 +192,7 @@ exit 1:   stack not found, or validate-lesson fails (lists reason)
 ### `install`
 ```
 reads:    lesson.json  (stack name, lesson path)
-          stack.json   (install command)
+          template.yaml   (install command)
 runs:     install command inside lesson directory
 exit 0:   dependencies installed
 exit 1:   install failed (prints raw output)
@@ -201,7 +201,7 @@ exit 1:   install failed (prints raw output)
 ### `check`
 ```
 reads:    lesson.json  (stack name, lesson path)
-          stack.json   (test command)
+          template.yaml   (test command)
 runs:     test command against lessons/<name>/tests/
 exit 0:   all checks pass
 exit 1:   test failures listed  (expected before tasks are complete — not an error state)
@@ -210,7 +210,7 @@ exit 1:   test failures listed  (expected before tasks are complete — not an e
 ### `grade-tests`
 ```
 reads:    lesson.json
-          stack.json   (test command)
+          template.yaml   (test command)
 runs:     test command against lessons/<name>/grading/
 writes:   results to stdout  (caller /grade writes REPORT.md)
 exit 0:   all grading tests pass
